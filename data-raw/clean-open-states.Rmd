@@ -1,0 +1,177 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+
+```{r}
+library(tidyverse)
+local_dir <- '/home/jtimm/jt_work/GitHub/packages/nmpols/data-raw/'
+open_states_dir <- paste0(local_dir, 'open-states-nmsl-54')
+os_legislators <- read.csv(paste0(open_states_dir, '/legislators/nm.csv'))
+
+legs2020 <- os_legislators %>%
+  mutate(family_name = gsub('Lara Cadena', 
+                            'Cadena', family_name)) %>%
+  arrange(current_chamber, 
+          family_name,
+          given_name) %>%
+  group_by(current_chamber, 
+           family_name) %>%
+  mutate(n = n()) %>%
+  ungroup() %>%
+  mutate(family_name = ifelse(n>1, 
+                              paste0(family_name, ', ', given_name),
+                              family_name)) %>%
+  select(current_chamber, name, 
+         family_name, given_name, 
+         current_party, current_district)
+
+
+current_chamber = c('upper', 
+                    'upper', 
+                    'lower', 
+                    'lower')
+
+name <- c('Carlos Cisneros', 
+          'John Pinto', 
+          'William Praat', 
+          'Roberto "Bobby" J. Gonzales')
+
+family_name <- c('Cisneros', 
+                 'Pinto', 
+                 'Praat', 
+                 'Gonzales')
+
+current_party <- rep('Democratic', 4)
+current_district <- c(6, 3, 27, 42)
+
+adds <- data.frame(current_chamber,
+                   name,
+                   family_name,
+                   current_party,
+                   current_district)
+
+
+legs2019 <- legs2020 %>%
+  filter(!paste0(current_chamber, 
+                 current_district) %in%
+           paste0(adds$current_chamber, 
+                  adds$current_district)) %>%
+  bind_rows(adds)%>%
+  arrange(current_chamber, 
+          family_name, 
+          given_name)
+
+setwd(open_states_dir)
+bill_files <- list.files(path = open_states_dir, 
+                         pattern = "bills.csv", 
+                         recursive = T)
+
+os_bills <- lapply(bill_files, read.csv) %>% 
+  data.table::rbindlist() %>% 
+  mutate(session_identifier = as.character(session_identifier))
+
+
+setwd(open_states_dir)
+bill_files <- list.files(path = open_states_dir, 
+                         pattern = "bills.csv", 
+                         recursive = T)
+
+os_bills <- lapply(bill_files, read.csv) %>% 
+  data.table::rbindlist() %>% 
+  mutate(session_identifier = as.character(session_identifier))
+
+
+setwd(open_states_dir)
+vdetails_files <- list.files(path = open_states_dir, 
+                             pattern = "votes.csv", 
+                             recursive = T)
+
+os_vdetails <- lapply(vdetails_files, read.csv) %>% 
+  data.table::rbindlist() %>% 
+  mutate(session_identifier = as.character(session_identifier))
+
+vote_files <- list.files(path = open_states_dir, 
+                         pattern = "vote_people.csv", 
+                         recursive = T)
+
+os_votes <- lapply(vote_files, read.csv) %>% data.table::rbindlist() 
+
+##
+roll <- read.csv('bills/2019/NM_2019_vote_counts.csv') %>%
+  select(-id) %>%
+  spread(option, value) 
+
+
+bill_votes <- os_vdetails %>% 
+  select(-identifier) %>%
+  left_join(os_bills, 
+            by = c('bill_id' = 'id',
+                   'jurisdiction' = 'jurisdiction',
+                   'session_identifier' = 'session_identifier')) %>%
+  left_join(roll, 
+            by = c('id' = 'vote_event_id'))
+
+
+###
+dups <- c('ocd-vote/77a697c2-c53b-4856-8631-0773e72f9f06',
+          'ocd-vote/2b8128f5-768e-4630-9af5-21e986dc2fa8',
+          'ocd-vote/c7a04b77-f55d-47f0-a8f1-860ed4b3a3d6')
+
+leg_votes <- os_votes %>% 
+  filter(!vote_event_id %in% dups,
+         voter_name != 'LT. GOVERNOR') %>%
+  select(-id) %>%
+  left_join(bill_votes, by = c('vote_event_id' = 'id')) 
+
+
+legs_in_rolls  <- leg_votes %>% 
+  group_by(organization_classification, voter_name) %>% 
+  count() %>% 
+  filter(voter_name != 'LT. GOVERNOR' & n > 100) %>%
+  select(-n) %>%
+  ungroup()  %>% 
+  ##
+  bind_cols(legs2019)
+
+
+### output for general -- 
+outie <- leg_votes %>%
+  left_join(legs_in_rolls, by = c('voter_name')) %>%
+  
+  mutate(vote = case_when (option == 'yes' ~ 'Yea', 
+                           option == 'no' ~ 'Nay',
+                           option %in% c('absent', 
+                                         'excused', 
+                                         'other') ~ 'Not Voting')) %>%
+  mutate(Party_Member_Vote = paste0(substr(current_party, 1, 3), ': ', vote))  %>%
+  
+  select(motion_text, session_identifier:title, 
+         current_chamber:family_name, current_party, 
+         current_district, vote, Party_Member_Vote)
+
+outie$Party_Member_Vote <- factor(outie$Party_Member_Vote)
+outie$Party_Member_Vote <- 
+  factor(outie$Party_Member_Vote, 
+         levels(outie$Party_Member_Vote)[c(3,6,1,4,2,5)])
+
+
+setwd(local_dir)
+saveRDS(outie, 'nm_open_states_2019.rds')
+
+
+### VV --
+# wide_rolls <- leg_votes %>%
+#   filter(!vote_event_id %in% dups) %>%
+#   mutate(tid = paste0(session_identifier, '_', 
+#                       gsub(' ', '-', identifier))) %>%
+#   select(voter_name, tid, option) %>%
+#   mutate(vote = case_when(option == "yes" ~ 1,
+#                           option == "no" ~ 6,
+#                           !option %in% c(1,6) ~ 9)) %>%
+#   dplyr::select(-option) %>%
+#   spread(key = tid, value = vote) %>%
+#   arrange(voter_name)
+```
+

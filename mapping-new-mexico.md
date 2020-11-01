@@ -162,7 +162,7 @@ main + patchwork::wrap_plots(ms) +
   plot_annotation(
     title = 'Percent of Households with a broadband internet subscription', 
     subtitle = 'SELECTED SOCIAL CHARACTERISTICS IN THE UNITED STATES',
-     caption = 'Source: Table DP02-0153P, ACS 5-year Estimates, 2014-18')
+     caption = 'Source: Table DP02-0153P, ACS 5-year Estimates, 2014-18 | Viz by @DrJayTimm')
 ```
 
 ![](mapping-new-mexico_files/figure-markdown_github/unnamed-chunk-10-1.png)
