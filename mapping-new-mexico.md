@@ -94,7 +94,7 @@ theme_guide <- function () {
 
 ``` r
 geo <- nm_lowers %>%
-  left_join(nms) %>%
+  left_join(nms, by = 'district_code') %>%
   filter(variable == 'internet_home') 
 
 mins <- min(geo$estimate)
@@ -118,12 +118,7 @@ main <- geo %>%
   theme(legend.position = 'bottom') +
   theme(panel.background = 
         element_rect(fill = '#d5e4eb', color = NA))
-
-
-main + labs(title = "Voting patterns by precinct") 
 ```
-
-![](mapping-new-mexico_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
 ``` r
 sub_geos <- c('Albuquerque, NM',
@@ -165,9 +160,9 @@ ms <-  patchwork::wrap_plots(minis, nrow = 2)
 main + patchwork::wrap_plots(ms) + 
   #patchwork::plot_layout(ncol = 2, widths = c(3, 2)) +
   plot_annotation(
-    title = 'Party bitches', 
-    subtitle = 'Twice',
-     caption = 'Sources: ACS 5-year Estimates, 2014-18')
+    title = 'Percent of Households with a broadband internet subscription', 
+    subtitle = 'SELECTED SOCIAL CHARACTERISTICS IN THE UNITED STATES',
+     caption = 'Source: Table DP02-0153P, ACS 5-year Estimates, 2014-18')
 ```
 
 ![](mapping-new-mexico_files/figure-markdown_github/unnamed-chunk-10-1.png)
