@@ -165,18 +165,6 @@ ms <-  patchwork::wrap_plots(minis, nrow = 2)
 ms
 ```
 
-    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
-    ## give correct results for longitude/latitude data
-
-    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
-    ## give correct results for longitude/latitude data
-
-    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
-    ## give correct results for longitude/latitude data
-
-    ## Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
-    ## give correct results for longitude/latitude data
-
 ![](mapping-new-mexico_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
 #### Patchwork
