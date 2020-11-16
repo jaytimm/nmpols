@@ -58,7 +58,7 @@ clean_nm_election_data <- function(dir,
 
                df2$variable <- as.character(df2$variable)
                df2$election <- dets[[7,1]]
-               df2$year <- gsub(' .*$', '', dets[[1,1]])
+               df2$year <- as.integer(gsub(' .*$', '', dets[[1,1]]))
 
                ## if (is_precinct) {}
                df2$sheet <- y ##:
