@@ -10,9 +10,9 @@ get_legis_geos <- function (state) {
     state = state, house = 'upper', cb = T)
   upper_house$district_code <- as.integer(substr(upper_house$SLDUST, 2, 3))
 
-  lower_house<- tigris::state_legislative_districts(
+  lower_house <- tigris::state_legislative_districts(
     state = state, house = 'lower', cb = T)
-  lower_house$district_code <- as.integer(substr(lower_house$SLDUST, 2, 3))
+  lower_house$district_code <- as.integer(substr(lower_house$SLDLST, 2, 3))
 
   counties <- tigris::counties(state = state, cb = T)
   cds_all <- tigris::congressional_districts(cb = T)
