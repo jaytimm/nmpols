@@ -18,10 +18,16 @@ get_legis_geos <- function (state) {
   cds_all <- tigris::congressional_districts(cb = T)
   cds <- subset(cds_all, STATEFP == state1$GEOID)
   places <- tigris::places(state = state, cb =T)
+  precincts <- tigris::voting_districts(state = state)
+  precincts <- precincts %>%
+    mutate(NAME10 = gsub('^Do.* Ana County',
+                         'Dona Ana County',
+                         NAME10))
 
   list('upper_house' = upper_house,
        'lower_house' = lower_house,
        'counties' = counties,
        'cds' = cds,
-       'places' = places)
+       'places' = places,
+       'precincts' = precincts)
 }
